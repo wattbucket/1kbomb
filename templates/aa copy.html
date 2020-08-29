@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js"></script>
+    <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        #map {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: #333;
+            -webkit-filter: grayscale(1) brightness(1.1);
+            filter: grayscale(1) brightness(1.1);
+        }
+
+        #maskCanvas {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 1%;
+            margin-right: 10px;
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-container">
+        <div id="map"></div>
+        <div id="maskCanvas"></div>
+    </div>
+    <!-- <script> -->
+    <script type="module">
+
+        // // import * as THREE from '../build/three.module.js';
+
+        // // import { OrbitControls } from './jsm/controls/OrbitControls.js';
+        // // // import { TransformControls } from './jsm/controls/TransformControls.js';
+
+        import * as THREE from './js/three.module.js';
+        // // import Stats from 'https://threejs.org/examples/jsm/libs/stats.module.js';
+        // // import { GUI } from 'https://threejs.org/examples/jsm/libs/dat.gui.module.js';
+
+        // // import { DragControls } from 'https://threejs.org/examples/jsm/controls/DragControls.js';
+        import { OrbitControls } from './js/OrbitControls.js';
+        import { TransformControls } from './js/TransformControls.js';
+
+        // LEAFLET
+        {
+            var map = L.map("map").setView([36.664179, -4.458629], 18)
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                maxNativeZoom: 19,
+                maxZoom: 25
+            }).addTo(map);
+        }
+        // TJS SOBRE EL MAPA
+        {
+            var container = document.getElementById('maskCanvas');
+            var scene = new THREE.Scene();
+            var viewSize = 10;
+            var aspectRatio = container.clientWidth / container.clientHeight;
+            var renderer = new THREE.WebGLRenderer({ alpha: true });
+            renderer.setClearColor(0x000000, 0); // the default
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            var camera = new THREE.OrthographicCamera(aspectRatio * viewSize / -2, aspectRatio * viewSize / 2, viewSize / 2, viewSize / -2, -100, 100);
+
+            var planeGeometry = new THREE.PlaneGeometry(viewSize * aspectRatio, viewSize);
+            var planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, specular: 0x111111, shininess: 50 });
+            planeMaterial.transparent = true;
+            planeMaterial.opacity = 0.01;
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            scene.add(plane);
+
+        }
+        // create a cube
+        {
+            var cubeGeometry = new THREE.BoxGeometry(.015, 2, 2);
+            var cubeMaterial = new THREE.MeshBasicMaterial({
+                color: 0x0000ff,
+                wireframe: true
+            });
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+            // position the cube
+            cube.position.set(0, 0, 0);
+
+            // add the cube to the scene
+            scene.add(cube);
+        }
+
+
+
+        // GUI
+        {
+            var step = 0;
+            var controls = new function () {
+                this.inclinacion = 0;
+                this.orientacion = 0;
+                this.latitud = 40;
+                this.longitud = -4;
+                this.vermapa = function () {
+                    $('#myModal').modal('show')
+                    // myFunction()
+                    // document.getElementById("exampleModal").style.display = "block";
+                    console.log('m1111')
+                }
+                this.m2 = () => {
+                    // $('#myModal2').modal('show')
+
+                    // myFunction()
+                    console.log('this.longitudfff')
+                    console.log(this.longitud)
+                }
+                this.delanvegador = () => {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        let lat = position.coords.latitude;
+                        let long = position.coords.longitude;
+
+                        latText.innerText = lat.toFixed(2);
+                        longText.innerText = long.toFixed(pk2);
+                    });
+                }
+
+                this.doRotationY = function () {
+                    var c = Math.cos(this.theta), s = Math.sin(this.theta);
+
+                    var rotationMatrix = new THREE.Matrix4();
+                    rotationMatrix.set(
+                        c, 0, s, 0,
+                        0, 1, 0, 0,
+                        -s, 0, c, 0,
+                        0, 0, 0, 1
+                    );
+
+                    cube.geometry.applyMatrix4(rotationMatrix);
+                    cube.geometry.verticesNeedUpdate = true;
+                }
+
+                this.doRotationZ = function () {
+                    var c = Math.cos(this.thetaz), s = Math.sin(this.thetaz);
+
+                    var rotationMatrix = new THREE.Matrix4();
+                    rotationMatrix.set(
+                        c, -s, 0, 0,
+                        s, c, 0, 0,
+                        0, 0, 1, 0,
+                        0, 0, 0, 1
+                    );
+
+                    cube.geometry.applyMatrix4(rotationMatrix);
+                    cube.geometry.verticesNeedUpdate = true;
+
+
+                };
+
+            };
+            var gui = new dat.GUI({ autoPlace: true });
+            const incliori = gui.addFolder("Inclinacion y Orientacion")
+            incliori.add(controls, 'inclinacion', 0, 90).step(1);
+            incliori.add(controls, 'orientacion', -180, 180).step(1);
+            const latlon = gui.addFolder("Latitud y Longitud")
+            // latlon.add(controls, 'latitud', 35, 45).step(1);
+            // latlon.add(controls, 'longitud', -10, 0).step(1);
+            latlon.add(controls, 'vermapa');
+            latlon.add(controls, 'm2');
+
+            latlon.add(controls, 'delanvegador');
+        }
+
+        {
+            camera.position.x = 0;
+            camera.position.y = 0;
+            camera.position.z = 10;
+
+            var axes = new THREE.AxesHelper(20);
+            scene.add(axes);
+        }
+
+
+
+
+        var render = function () {
+            cube.rotation.y = (-controls.orientacion - 90) * Math.PI / 180;
+            cube.rotation.x = (controls.inclinacion + 90) * Math.PI / 180;
+
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        };
+        render();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<body>
+
+<script src="js/Three.js"></script>
+<script src="js/CSS3DRenderer2.js"></script>
+<script src="js/THREEx.WindowResize.js"></script>
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script src="https://threejs.org/examples/js/renderers/CSS3DRenderer.js"></script>
+
+<div id="ThreeJS" style="position: absolute; left: 0px; top: 0px"></div>
+<script>
+    var container, scene, camera, renderer, controls, stats;
+    var rendererCSS;
+
+    init();
+    animate();
+
+    function init() {
+        scene = new THREE.Scene();
+        var SCREEN_WIDTH = window.innerWidth, SCREEN_HEIGHT = window.innerHeight;
+        var VIEW_ANGLE = 45, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
+        camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
+        scene.add(camera);
+        camera.position.set(0, 150, 400);
+        camera.lookAt(scene.position);
+
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+        container = document.getElementById('ThreeJS');
+        container.appendChild(renderer.domElement);
+
+        var planeMaterial = new THREE.MeshBasicMaterial({
+            color : 0xFFFFFF,
+            side : THREE.DoubleSide
+        });
+
+        var planeWidth = 360;
+        var planeHeight = 120;
+        var planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+        var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+        planeMesh.position.y += 50;
+        scene.add(planeMesh);
+
+
+        cssScene = new THREE.Scene();
+        var element = document.createElement('iframe')
+        element.src = "00leaflet3js.html";
+        var elementWidth = 1024;
+        // force iframe to have same relative dimensions as planeGeometry
+        var aspectRatio = planeHeight / planeWidth;
+        var elementHeight = elementWidth * aspectRatio;
+        element.style.width  = elementWidth + "px";
+        element.style.height = elementHeight + "px";
+
+        var cssObject = new THREE.CSS3DObject(element);
+        cssObject.position  = planeMesh.position;
+        cssObject.rotation  = planeMesh.rotation;
+        var percentBorder = 0.05;
+        cssObject.scale.x /= (1 + percentBorder) * (elementWidth / planeWidth);
+        cssObject.scale.y /= (1 + percentBorder) * (elementWidth / planeWidth);
+        cssScene.add(cssObject);
+
+        rendererCSS = new THREE.CSS3DRenderer();
+        rendererCSS.setSize(window.innerWidth, window.innerHeight );
+        document.body.appendChild(rendererCSS.domElement);
+
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    function render() {
+        rendererCSS.render(cssScene, camera);
+        renderer.render(scene, camera);
+    }
+</script>
+
+</body>
+</html>

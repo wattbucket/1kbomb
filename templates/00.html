@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Example 01.01 - Basic skeleton modificado para ver el panel hace falta la textura del panel</title>
+    <meta charset="UTF-8" />
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+</head>
+
+<body>
+    <!-- Div which will hold the Output -->
+    <div id="webgl-output"></div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        var scene = new THREE.Scene();
+        // RENDERER
+        {
+            var renderer = new THREE.WebGLRenderer();
+            document.getElementById("webgl-output").appendChild(renderer.domElement);
+            renderer.setClearColor(new THREE.Color(0xffffff));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+        }
+        // PLANO
+        {
+            var axes = new THREE.AxesHelper(20);
+            scene.add(axes);
+            var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
+            var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.set(-0.5 * Math.PI, 0, 0);
+            plane.position.set(0, 0, 0);
+            plane.receiveShadow = true;
+            scene.add(plane);
+        }
+        // OBJETO-PANEL
+        {
+            var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy()
+            var cubeMaterial = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
+            // var cubeMaterial = new THREE.MeshLambertMaterial();
+            cubeMaterial.transparent = true;
+            var cubeGeometry = new THREE.BoxGeometry(.1, 8, 8);
+            var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+            cube.castShadow = true;
+            cube.position.set(0, 0, 0);
+            scene.add(cube);
+        }
+        // LUCES
+        {
+            // add spotlight for the shadows
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-10, 20, +30);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+            // add subtle ambient lighting
+            var ambienLight = new THREE.AmbientLight(0x353535);
+            scene.add(ambienLight);
+        }
+        // CAMARA
+        {
+            var camera = new THREE.PerspectiveCamera(45, 1 * window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(-30, 30, 30);
+            camera.lookAt(scene.position);
+        }
+        // GUI
+        {
+            var step = 0;
+            // funciones
+            var controls = new function () {
+                this.inclinacion = 30;
+                this.orientacion = 0;
+                this.posiciona = function () {
+                    console.log(controls.inclinacion)
+                }
+                this.posicionaT = function () {
+                    console.log(controls.inclinacion)
+                }
+            };
+            //  panel
+            var gui = new dat.GUI();
+            gui.add(controls, 'inclinacion', 0, 90).step(1);
+            gui.add(controls, 'orientacion', -180, 180).step(1);
+            gui.add(controls, 'posiciona');
+            // gui.add(controls, 'posicionaT');
+        }
+        // ...ACCION
+        render();
+        function render() {
+            cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
+            cube.rotation.y = -controls.orientacion * Math.PI / 180;
+            // 
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>

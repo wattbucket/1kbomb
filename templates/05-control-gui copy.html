@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<html>
+
+<body>
+
+    <head>
+        <title>Example 01.05 - Control gui</title>
+        <meta charset="UTF-8" />
+
+        <script src="https://threejs.org/build/three.min.js"></script>
+        <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+
+        <!-- <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+
+	<!-- para leaflet ================================================================== -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css"
+		integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+		crossorigin="" />
+
+
+	<!-- java script -->
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+		crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+		integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+		crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+		integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+		crossorigin="anonymous"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js"
+		integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA=="
+		crossorigin=""></script>
+	<!-- para leaflet ================================================================== -->
+
+
+
+
+    </head>
+
+
+    <div style="position: absolute; left: 1em; top: 1em; display:none" id="map">
+        aqui es donde debe salre el mleaflet
+    </div>
+
+
+
+
+
+    <div id="webgl-output"></div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        (function () {
+            // your page initialization code here
+            // the DOM will be available here
+
+            function initialize() {
+                // Initialize the map
+                var map = L.map('map').setView([40, -4], 5);
+                L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+                    maxZoom: 18
+                }).addTo(map);
+
+
+                // Event Handlers
+                var output_lat = document.getElementById("latitud_value");
+                var output_lon = document.getElementById("longitud_value");
+                var theMarker = {};
+                map.on('click', function (e) {
+                    lat = e.latlng.lat;
+                    lon = e.latlng.lng;
+
+                    console.log("has clicao LAT: " + lat + " y LONG: " + lon);
+                    //Clear existing marker, 
+
+                    if (theMarker != undefined) {
+                        map.removeLayer(theMarker);
+                    };
+
+                    //Add a marker to show where you clicked.
+                    theMarker = L.marker([lat, lon]).addTo(map);
+                    var llat = lat.toFixed(3);
+                    var llon = lon.toFixed(3);
+                    output_lat.innerHTML = llat;
+                    output_lon.innerHTML = llon;
+                    // fetchdata()
+                });
+            }
+            function init() {
+                // var stats = initStats();
+
+
+
+
+                // create a scene, that will hold all our elements such as objects, cameras and lights.
+                var scene = new THREE.Scene();
+
+                // create a camera, which defines where we're looking at.
+                var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+                // create a render and set the size
+                var renderer = new THREE.WebGLRenderer();
+
+                renderer.setClearColor(new THREE.Color(0xffffff));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+
+
+                var axes = new THREE.AxesHelper(20);
+                scene.add(axes);
+
+                // create the ground plane
+                var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
+                var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+                var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+                plane.receiveShadow = true;
+
+                // rotate and position the plane
+                plane.rotation.x = -0.5 * Math.PI;
+                plane.position.x = 0;
+                plane.position.y = 0;
+                plane.position.z = 0;
+
+                // add the plane to the scene
+                scene.add(plane);
+
+                // create a cube
+                var cubeGeometry = new THREE.BoxGeometry(.1, 8, 8);
+                var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+                var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                cube.castShadow = true;
+
+                // position the cube
+                cube.position.x = 0;
+                cube.position.y = 0;
+                cube.position.z = 0;
+
+                // add the cube to the scene
+                scene.add(cube);
+
+
+                // position and point the camera to the center of the scene
+                camera.position.x = -30;
+                camera.position.y = 40;
+                camera.position.z = 30;
+                camera.lookAt(scene.position);
+
+                // add subtle ambient lighting
+                var ambienLight = new THREE.AmbientLight(0x353535);
+                scene.add(ambienLight);
+
+                // add spotlight for the shadows
+                var spotLight = new THREE.SpotLight(0xffffff);
+                spotLight.position.set(-10, 20, -5);
+                spotLight.castShadow = true;
+                scene.add(spotLight);
+
+                // add the output of the renderer to the html element
+                document.getElementById("webgl-output").appendChild(renderer.domElement);
+
+                // call the render function
+                var step = 0;
+
+                var controls = new function () {
+                    this.inclinacion = 30;
+                    this.orientacion = 0;
+                    this.m1 = function pp() {
+                        myFunction()
+                        console.log('hola caracola')
+                    }
+                    this.m2 = function pp() {
+                        myFunction()
+                        console.log('holo caracola')
+                    }
+                };
+
+                var gui = new dat.GUI({ autoPlace: true });
+                const incliori = gui.addFolder("Inclinacion y Orientacion")
+                incliori.add(controls, 'inclinacion', 0, 90).step(1);
+                incliori.add(controls, 'orientacion', -180, 180).step(1);
+                const latlon = gui.addFolder("Latitud y Longitud")
+                latlon.add(controls, 'm1');
+                latlon.add(controls, 'm2');
+
+
+                // attach them here, since appendChild needs to be called first
+                // var trackballControls = initTrackballControls(camera, renderer);
+                // var clock = new THREE.Clock();
+
+                render();
+
+                function render() {
+                    cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
+                    cube.rotation.y = -controls.orientacion * Math.PI / 180;
+                    // console.log(cube.rotation.z)
+                    requestAnimationFrame(render);
+                    renderer.render(scene, camera);
+                }
+
+
+                function myFunction() {
+                    var x = document.getElementById("map");
+                    if (x.style.display === "none") {
+                        x.style.display = "block";
+                    } else {
+                        x.style.display = "none";
+                    }
+                }
+
+
+            }
+
+            init()
+            initialize()
+
+        })();
+    </script>
+</body>
+
+</html>

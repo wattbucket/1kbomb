@@ -1,0 +1,7 @@
+flask
+numpy
+pandas
+matplotlib
+bokeh
+zappa
+flask-cors

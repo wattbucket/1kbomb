@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js"></script>
+    <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        #map {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: #333;
+            -webkit-filter: grayscale(1) brightness(1.1);
+            filter: grayscale(1) brightness(1.1);
+        }
+
+        #maskCanvas {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 1%;
+            margin-right: 10px;
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-container">
+        <div id="map"></div>
+        <div id="maskCanvas"></div>
+    </div>
+    <!-- <script> -->
+    <script type="module">
+
+        import * as THREE from './js/three.module.js';
+        import { OrbitControls } from './js/OrbitControls.js';
+        import { TransformControls } from './js/TransformControls.js';
+
+        // LEAFLET
+        {
+            var map = L.map("map").setView([36.664179, -4.458629], 18)
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                maxNativeZoom: 19,
+                maxZoom: 25
+            }).addTo(map);
+        }
+        // TJS SOBRE EL MAPA
+        {
+            var cube, mesh
+            var container = document.getElementById('maskCanvas');
+            var scene = new THREE.Scene();
+
+            {
+                var viewSize = 10;
+                var aspectRatio = container.clientWidth / container.clientHeight;
+                var camera = new THREE.OrthographicCamera(aspectRatio * viewSize / -2, aspectRatio * viewSize / 2, viewSize / 2, viewSize / -2, -100, 100);
+            }
+
+            var renderer = new THREE.WebGLRenderer({ alpha: true });
+            {
+                renderer.setClearColor(0x000000, 0); // the default
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.shadowMap.enabled = true;
+
+                container.appendChild(renderer.domElement);
+            }
+
+
+
+            var planeGeometry = new THREE.PlaneGeometry(viewSize * aspectRatio, viewSize);
+            var planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, specular: 0x111111, shininess: 50 });
+            // planeMaterial.transparent = true;
+            planeMaterial.opacity = 0.01;
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
+
+            scene.add(plane);
+
+        }
+
+        var ambienLight = new THREE.AmbientLight(0x353535);
+        scene.add(ambienLight);
+
+        // add spotlight for the shadows
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-10, 20, -5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+
+        {
+            var light = new THREE.DirectionalLight(0xffffff, 2);
+            light.position.set(1, 1, 1);
+            scene.add(light);
+        }
+
+        // create a cube
+        function cubef() {
+            var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+            var geometry = new THREE.BoxGeometry(.01, 2, 2);
+            var material = new THREE.MeshBasicMaterial({
+                map: texture,
+                transparent: true
+            });
+            cube = new THREE.Mesh(geometry, material);
+            cube.position.set(0, 0, 0);
+            scene.add(cube);
+        }
+        cubef()
+
+        function panel() {
+            var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+            var geometry = new THREE.BoxGeometry(.002, 2, 2);
+            var material = new THREE.MeshLambertMaterial({
+                map: texture,
+                transparent: true
+            });
+            mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(1, 2, 5);
+            scene.add(mesh);
+        }
+
+        // panel()
+
+
+        // GUI
+        {
+            var step = 0;
+            var controls = new function () {
+                this.inclinacion = 35;
+                this.orientacion = 0;
+                this.yy = 0;
+
+                this.vermapa = function () {
+                    $('#myModal').modal('show')
+                    // myFunction()
+                    // document.getElementById("exampleModal").style.display = "block";
+                    console.log('m1111')
+                }
+                this.m2 = () => {
+                    // $('#myModal2').modal('show')
+
+                    // myFunction()
+                    console.log('this.longitudfff')
+                    console.log(this.longitud)
+                }
+                this.delanvegador = () => {
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        let lat = position.coords.latitude;
+                        let long = position.coords.longitude;
+
+                        latText.innerText = lat.toFixed(2);
+                        longText.innerText = long.toFixed(pk2);
+                    });
+                }
+
+
+            };
+            var gui = new dat.GUI({ autoPlace: true });
+            const incliori = gui.addFolder("Inclinacion y Orientacion")
+            incliori.add(controls, 'inclinacion', 0, 90).step(1);
+            // incliori.add(controls, 'yy', 0, 90).step(1);
+            incliori.add(controls, 'orientacion', -180, 180).step(1);
+            const latlon = gui.addFolder("Latitud y Longitud")
+            // latlon.add(controls, 'latitud', 35, 45).step(1);
+            // latlon.add(controls, 'longitud', -10, 0).step(1);
+            latlon.add(controls, 'vermapa');
+            latlon.add(controls, 'm2');
+
+            latlon.add(controls, 'delanvegador');
+        }
+
+        {
+            camera.position.x = 0;
+            camera.position.y = 0;
+            camera.position.z = 10;
+            camera.lookAt(scene.position);
+
+            var axes = new THREE.AxesHelper(20);
+            scene.add(axes);
+        }
+
+
+
+
+        var render = function () {
+            cube.rotation.y = (-controls.orientacion + 90) * Math.PI / 180;
+            // cube.rotation.x = (controls.yy + 90) * Math.PI / 180;
+            cube.rotation.x = Math.PI / 2;
+            cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
+
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        };
+        render();
+    </script>
+</body>
+
+</html>

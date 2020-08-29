@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <style>
+    #scene3d {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: block;
+    }
+  </style>
+
+
+</head>
+<html>
+
+<body>
+
+
+
+  <main role="main">
+
+
+    <div class="album py-5 bg-light">
+      <div class="container">
+
+        <div class="row">
+
+
+          <div class="col-md-5">
+            <div class="card mb-5 shadow-sm">
+
+              <div class="card-body">
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                  additional
+                  content. This content is a little bit longer.</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                  </div>
+                  <small class="text-muted">9 mins</small>
+                </div>
+              </div>
+              </section>
+            </div>
+          </div>
+
+
+
+          <div class="col-md-5">
+            <div id="scene3d">
+            </div>
+          </div>
+
+
+          <div class="col-md-5">
+            <div class="card mb-5 shadow-sm">
+              <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail">
+                <title>Placeholder</title>
+                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
+                  dy=".3em">Thumbnail</text>
+              </svg>
+              <div class="card-body">
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
+                  content. This content is a little bit longer.</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                  </div>
+                  <small class="text-muted">9 mins</small>
+                </div>
+              </div>
+            </div>
+          </div>
+  </main>
+
+
+
+  
+  <script src="https://threejs.org/build/three.min.js"></script>
+
+  <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/loaders/VRMLLoader.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+
+  <script>
+    var scene3d = document.getElementById("scene3d");
+    // SCENE
+    var scene = new THREE.Scene();
+    // CAMERA 
+    {
+      var camera = new THREE.PerspectiveCamera(45, scene3d.clientWidth / scene3d.clientHeight, 0.1, 100);
+      camera.position.x = 17;
+      camera.position.y = 12;
+      camera.position.z = 13;
+      camera.lookAt(scene.position);
+      // camera.aspect = scene3d.clientWidth / scene3d.clientHeight;
+      // camera.updateProjectionMatrix();
+    }
+    // GEOMETRY & MATERIALS
+    {
+      var cubeGeometry = new THREE.BoxGeometry(3, 3, .51);
+      var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff55ff });
+      var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+      scene.add(cube);
+      cube.position.z = 4;
+      cube.rotation.set(2 * Math.PI / 3, 0, 0);
+    }
+    // suelo
+    {
+      var floorGeometry = new THREE.BoxGeometry(30, 1, 30);
+      var floorMaterial = new THREE.MeshBasicMaterial({ color: 0x656587 });
+      var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+      scene.add(floor);
+      floor.position.y = -3;
+      floor.receiveShadow = true;
+    }
+    // LIGHT
+    {
+      var spot1 = new THREE.SpotLight(0xffffff);
+      spot1.position.set(10, 100, -50);
+      scene.add(spot1);
+    }
+    // GUI
+    {
+      var gui = new dat.GUI({ autoPlace: false });
+
+      var control = new function () {
+        this.inclinacion = 30;
+        this.orientacion = 0;
+      };
+
+
+
+      var menu = gui.addFolder('incli-orien');
+      menu.add(control, 'inclinacion', 0, 90);
+      menu.add(control, 'orientacion', -180, 180);
+    }
+    // RENDERER
+    {
+      var renderer = new THREE.WebGLRenderer();
+
+      
+      // renderer.setClearColor(0x000, 1.0);
+      renderer.setSize(scene3d.clientWidth, scene3d.clientHeight);
+      renderer.setClearColor(0xffffff, 1.0);
+    }
+
+
+    scene3d.appendChild(gui.domElement);
+    scene3d.appendChild(renderer.domElement);
+    renderer.render(scene, camera);
+
+  </script>
+
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+
+
+
+
+
+</body>
+
+</html>

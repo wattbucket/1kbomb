@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <style>
+    #scene3d {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      display: block;
+    }
+  </style>
+
+
+</head>
+<html>
+
+<body>
+
+
+
+  <main role="main">
+
+
+    <div class="album py-5 bg-light">
+      <div class="container">
+
+        <div class="row">
+
+
+          <div class="col-md-5">
+            <div class="card mb-5 shadow-sm">
+
+              <div class="card-body">
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                  additional
+                  content. This content is a little bit longer.</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                  </div>
+                  <small class="text-muted">9 mins</small>
+                </div>
+              </div>
+              </section>
+            </div>
+          </div>
+
+
+
+          <div class="col-md-5">
+            <div id="scene3d">
+            </div>
+          </div>
+
+
+          <div class="col-md-5">
+            <div class="card mb-5 shadow-sm">
+              <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
+                preserveAspectRatio="xMidYMid slice" focusable="false" role="img" aria-label="Placeholder: Thumbnail">
+                <title>Placeholder</title>
+                <rect width="100%" height="100%" fill="#55595c" /><text x="50%" y="50%" fill="#eceeef"
+                  dy=".3em">Thumbnail</text>
+              </svg>
+              <div class="card-body">
+                <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional
+                  content. This content is a little bit longer.</p>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                  </div>
+                  <small class="text-muted">9 mins</small>
+                </div>
+              </div>
+            </div>
+          </div>
+  </main>
+
+
+
+
+  <script src="https://threejs.org/build/three.min.js"></script>
+
+  <script type="text/javascript" src="https://threejs.org/build/three.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/loaders/VRMLLoader.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/libs/stats.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5/dat.gui.min.js"></script>
+  <script type="text/javascript" src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+
+
+  <script>
+    var scene3d = document.getElementById("scene3d");
+
+    // create a scene, that will hold all our elements such as objects, cameras and lights.
+    var scene = new THREE.Scene();
+
+    // create a camera, which defines where we're looking at.
+    var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+    // create a render and set the size
+    const renderer = new THREE.WebGLRenderer({ scene3d });
+
+    renderer.setClearColor(new THREE.Color(0xffffff));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+
+
+    var axes = new THREE.AxesHelper(20);
+    scene.add(axes);
+
+    // create the ground plane
+    var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
+    var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+    var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    plane.receiveShadow = true;
+
+    // rotate and position the plane
+    plane.rotation.x = -0.5 * Math.PI;
+    plane.position.x = 0;
+    plane.position.y = 0;
+    plane.position.z = 0;
+
+    // add the plane to the scene
+    scene.add(plane);
+    // create a cube and add to scene
+    var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+
+    var cubeMaterial = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
+    cubeMaterial.transparent = true;
+    // create a cube
+    var cubeGeometry = new THREE.BoxGeometry(.1, 8, 8);
+    // var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+    var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    cube.castShadow = true;
+
+    // position the cube
+    cube.position.x = 0;
+    cube.position.y = -0.001;
+    cube.position.z = 0;
+
+    // add the cube to the scene
+    scene.add(cube);
+
+
+    // position and point the camera to the center of the scene
+    camera.position.x = -30;
+    camera.position.y = 40;
+    camera.position.z = 30;
+    camera.lookAt(scene.position);
+
+    // add subtle ambient lighting
+    var ambienLight = new THREE.AmbientLight(0x353535);
+    scene.add(ambienLight);
+
+    // add spotlight for the shadows
+    var spotLight = new THREE.SpotLight(0xffffff);
+    spotLight.position.set(-10, 20, -5);
+    spotLight.castShadow = true;
+    scene.add(spotLight);
+    var gui = new dat.GUI();
+
+    var controls = new function () {
+      this.inclinacion = 30;
+      this.orientacion = 0;
+      this.posiciona = function () {
+        console.log(controls.inclinacion)
+      }
+    };
+
+    gui.add(controls, 'inclinacion', 0, 90).step(1);
+    gui.add(controls, 'orientacion', -180, 180).step(1);
+    gui.add(controls, 'posiciona');
+
+    // RENDERER
+
+    function resizeRendererToDisplaySize(renderer) {
+
+      const width = scene3d.clientWidth;
+      const height = scene3d.clientHeight;
+      const needResize = scene3d.width !== width || scene3d.height !== height;
+      if (needResize) {
+        renderer.setSize(width, height, false);
+      }
+      return needResize;
+    }
+
+
+
+    render();
+
+
+    function render() {
+      if (resizeRendererToDisplaySize(renderer)) {
+        camera.aspect = scene3d.clientWidth / scene3d.clientHeight;
+        camera.updateProjectionMatrix();
+      }
+      cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
+      cube.rotation.y = -controls.orientacion * Math.PI / 180;
+      scene3d.appendChild(renderer.domElement);
+      scene3d.appendChild(gui.domElement);
+      requestAnimationFrame(render);
+
+      renderer.render(scene, camera);
+    }
+
+  </script>
+
+
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+
+
+
+
+
+
+</body>
+
+</html>
