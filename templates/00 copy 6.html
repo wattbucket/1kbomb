@@ -20,18 +20,17 @@
 </head>
 <!-- https://turfjs.org/docs/ -->
 <!-- https://turfjs.org/docs/#squareGrid -->
-
 <body>
     <div id="map"></div>
     <!--Three js Addition-->
     <script>
         var map = L.map("map", { center: [36.664165457763715, -4.458582401275635], zoom: 17 });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            // L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-            // L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        // L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+        // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             maxNativeZoom: 19,
             maxZoom: 25
         }
@@ -49,8 +48,8 @@
 
 
         });
-        //INTRO
-        intro = introJs();
+                //INTRO
+                intro = introJs();
         intro.setOptions({
             steps: [
                 {
