@@ -67,18 +67,9 @@
         }
         // TJS SOBRE EL MAPA
         {
-            var mesh
-
-            var scene = new THREE.Scene();
+            var cube, mesh
             var container = document.getElementById('maskCanvas');
-            
-            {
-                var renderer = new THREE.WebGLRenderer({ alpha: true });
-                renderer.setClearColor(0x000000, 0); // the default
-                renderer.setSize(container.clientWidth, container.clientHeight);
-                renderer.shadowMap.enabled = true;
-                container.appendChild(renderer.domElement);
-            }
+            var scene = new THREE.Scene();
 
             {
                 var viewSize = 10;
@@ -86,15 +77,24 @@
                 var camera = new THREE.OrthographicCamera(aspectRatio * viewSize / -2, aspectRatio * viewSize / 2, viewSize / 2, viewSize / -2, -100, 100);
             }
 
+            var renderer = new THREE.WebGLRenderer({ alpha: true });
+            {
+                renderer.setClearColor(0x000000, 0); // the default
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.shadowMap.enabled = true;
+
+                container.appendChild(renderer.domElement);
+            }
 
 
-            var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
-            var planeMaterial = new THREE.ShadowMaterial({ opacity: 0.8 });
-            // var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff,opacity: 0.1,transparent: true });
+
+            var planeGeometry = new THREE.PlaneGeometry(viewSize * aspectRatio, viewSize);
+            var planeMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, specular: 0x111111, shininess: 50 });
+            // planeMaterial.transparent = true;
+            planeMaterial.opacity = 0.01;
             var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-            plane.rotation.set(-0.5 * Math.PI, 0, 0);
-            plane.position.set(0, 0, 0);
             plane.receiveShadow = true;
+
             scene.add(plane);
 
         }
@@ -104,7 +104,7 @@
 
         // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(-10, 20, 30);
+        spotLight.position.set(-10, 20, -5);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
@@ -116,7 +116,7 @@
         }
 
         // create a cube
-        {
+        function cubef() {
             var texture = new THREE.TextureLoader().load('textures/panel.png', render);
             texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
             var geometry = new THREE.BoxGeometry(.01, 2, 2);
@@ -124,19 +124,34 @@
                 map: texture,
                 transparent: true
             });
-            var cube = new THREE.Mesh(geometry, material);
+            cube = new THREE.Mesh(geometry, material);
             cube.position.set(0, 0, 0);
             scene.add(cube);
         }
+        cubef()
 
+        function panel() {
+            var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+            texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
+            var geometry = new THREE.BoxGeometry(.002, 2, 2);
+            var material = new THREE.MeshLambertMaterial({
+                map: texture,
+                transparent: true
+            });
+            mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(1, 2, 5);
+            scene.add(mesh);
+        }
+
+        // panel()
 
 
         // GUI
         {
             var step = 0;
             var controls = new function () {
-                this.inclinacion = 25;
+                this.inclinacion = 35;
                 this.orientacion = 0;
                 this.yy = 0;
 
@@ -180,8 +195,8 @@
         }
 
         {
-            camera.position.x = 10;
-            camera.position.y = 10;
+            camera.position.x = 0;
+            camera.position.y = 0;
             camera.position.z = 10;
             camera.lookAt(scene.position);
 

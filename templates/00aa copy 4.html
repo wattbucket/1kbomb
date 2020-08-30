@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet-src.js"></script>
+    <!-- <script src="https://threejs.org/build/three.min.js"></script> -->
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+    <style>
+        html,
+        body {
+            height: 100%;
+        }
+
+        #map {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            background-color: #333;
+            -webkit-filter: grayscale(1) brightness(1.1);
+            filter: grayscale(1) brightness(1.1);
+        }
+
+        #maskCanvas {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 1%;
+            margin-right: 10px;
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="map-container">
+        <div id="map"></div>
+        <div id="maskCanvas"></div>
+    </div>
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
+
+    <!-- <script> -->
+    <script type="module">
+
+        import * as THREE from './js/three.module.js';
+        import { OrbitControls } from './js/OrbitControls.js';
+        import { TransformControls } from './js/TransformControls.js';
+
+        // LEAFLET
+        {
+            var map = L.map("map").setView([36.664179, -4.458629], 18)
+            L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                {
+                    maxNativeZoom: 19,
+                    maxZoom: 25
+                }
+            ).addTo(map);
+        }
+
+        var container = document.getElementById('maskCanvas');
+
+        {
+            var viewSize = 10;
+            var aspectRatio = container.clientWidth / container.clientHeight;
+            var camera = new THREE.OrthographicCamera(aspectRatio * viewSize / -2, aspectRatio * viewSize / 2, viewSize / 2, viewSize / -2, -100, 100);
+        }
+
+
+
+
+
+        // 3JS SOBRE EL MAPA
+        var scene = new THREE.Scene();
+
+        // create a camera, which defines where we're looking at.
+        // var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+        // create a render and set the size
+        var renderer = new THREE.WebGLRenderer({ alpha: true });
+        {
+            renderer.setClearColor(0x000000, 0); // the default
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.shadowMap.enabled = true;
+
+            container.appendChild(renderer.domElement);
+        }
+
+        {
+            var axes = new THREE.AxesHelper(20);
+            scene.add(axes);
+
+            // create the ground plane
+            var planeGeometry = new THREE.PlaneGeometry(20, 20, 1, 1);
+            var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
+
+            // rotate and position the plane
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.x = 0;
+            plane.position.y = 0;
+            plane.position.z = 0;
+            // scene.add(plane);
+
+        }
+
+        // add the plane to the scene
+        // create a cube and add to scene
+        var texture = new THREE.TextureLoader().load('textures/panel.png', render);
+        texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+
+        var cubeMaterial = new THREE.MeshLambertMaterial({ map: texture, transparent: true });
+        cubeMaterial.transparent = true;
+        // create a cube
+        var cubeGeometry = new THREE.BoxGeometry(.1, 8, 8);
+        // var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+        var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.castShadow = true;
+
+        // position the cube
+        cube.position.x = 0;
+        cube.position.y = -0.001;
+        cube.position.z = 0;
+
+        // add the cube to the scene
+        scene.add(cube);
+
+
+        // position and point the camera to the center of the scene
+        camera.position.x = -30;
+        camera.position.y = 40;
+        camera.position.z = 30;
+        camera.lookAt(scene.position);
+
+        // add subtle ambient lighting
+        // var ambienLight = new THREE.AmbientLight(0x353535);
+        // scene.add(ambienLight);
+
+        // add spotlight for the shadows
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-10, 20, -5);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // add the output of the renderer to the html element
+        // document.getElementById("maskCanvas").appendChild(renderer.domElement);
+
+        // call the render function
+        var step = 0;
+
+        var controls = new function () {
+            this.inclinacion = 30;
+            this.orientacion = 0;
+            this.posiciona = function () {
+                console.log(controls.inclinacion)
+            }
+        };
+
+        var gui = new dat.GUI();
+        gui.add(controls, 'inclinacion', 0, 90).step(1);
+        gui.add(controls, 'orientacion', -180, 180).step(1);
+        gui.add(controls, 'posiciona');
+
+
+
+        // attach them here, since appendChild needs to be called first
+        // var trackballControls = initTrackballControls(camera, renderer);
+
+        render();
+
+        function render() {
+            cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
+            cube.rotation.y = -controls.orientacion * Math.PI / 180;
+            // console.log(cube.rotation.z)
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+
+</html>
