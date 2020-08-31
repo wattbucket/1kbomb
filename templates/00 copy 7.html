@@ -25,14 +25,7 @@
     <div id="map"></div>
     <!--Three js Addition-->
     <script>
-        var map = L.map("map", { 
-            center: [36.664165457763715, -4.458582401275635], 
-            zoom: 17, 
-            dragging: false,
-            scrollWheelZoom: false,
-            zoomControl: false,
-            doubleClickZoom: false
-            });
+        var map = L.map("map", { center: [36.664165457763715, -4.458582401275635], zoom: 17 });
 
         // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             // L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
@@ -53,8 +46,6 @@
             c = map.getCenter()
             marker.setLatLng(c).update();
         });
-
-
 
     </script>
 </body>

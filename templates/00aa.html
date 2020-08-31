@@ -58,9 +58,18 @@
         import { OrbitControls } from './js/OrbitControls.js';
         import { TransformControls } from './js/TransformControls.js';
 
+
+
+
         // LEAFLET
         {
-            var map = L.map("map", { center: [36.664165457763715, -4.458582401275635], zoom: 17 });
+            var map = L.map("map", { 
+                center: [36.664165457763715, -4.458582401275635], 
+            zoom: 20 ,            
+            dragging: false,
+            scrollWheelZoom: false,
+            zoomControl: false
+            });
             var c
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 // L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
@@ -219,9 +228,12 @@
                 this.orientacion = 0;
                 this.sol = 0;
                 this.posiciona = function () {
+                    to_image();
+
                     console.log(controls.inclinacion)
                 }
                 this.posicionaT = function () {
+                    to_image();
                     console.log(controls.inclinacion)
                 }
             };
@@ -238,7 +250,7 @@
         function render() {
             cube.rotation.z = (controls.inclinacion - 90) * Math.PI / 180;
             cube.rotation.y = (-controls.orientacion + 90) * Math.PI / 180;
-            light.position.x=controls.sol
+            light.position.x = controls.sol
             // 
             requestAnimationFrame(render);
             renderer.render(scene, camera);
