@@ -5,60 +5,117 @@
     <meta charset="UTF-8">
     <title>Threejs & Leaflet</title>
     <style>
+        <style>html,
+        body {
+            height: 100%;
+        }
+
         #map {
             position: absolute;
             height: 100%;
             width: 100%;
-            /* background-color: #333; */
-            /* -webkit-filter: grayscale(1) brightness(1.1);
-            filter: grayscale(1) brightness(1.1); */
+            background-color: #333;
+            /* -webkit-filter: grayscale(1) brightness(1.1); */
+            /* filter: grayscale(1) brightness(1.1); */
         }
+
+        #maskCanvas {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .map-container {
+            position: relative;
+            display: inline-block;
+            margin-left: 1%;
+            margin-right: 10px;
+            width: 100%;
+            height: 100%;
+            vertical-align: top;
+        }
+    </style>
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+    <script src="https://threejs.org/examples/js/libs/dat.gui.min.js"></script>
 
 </head>
 <!-- https://turfjs.org/docs/ -->
 <!-- https://turfjs.org/docs/#squareGrid -->
 
 <body>
+    <!-- <div class="map-container"> -->
     <div id="map"></div>
+    <!-- <div id="maskCanvas"></div> -->
+    </div>
+    <!-- <div id="map"></div> -->
     <!--Three js Addition-->
     <script>
-        var map = L.map("map", { 
-            center: [36.664165457763715, -4.458582401275635], 
-            zoom: 17, 
-            dragging: false,
-            scrollWheelZoom: false,
-            zoomControl: false,
-            doubleClickZoom: false
+        function map() {
+            var map = L.map("map", {
+                center: [36.664165457763715, -4.458582401275635],
+                zoom: 17,
+                dragging: false,
+                scrollWheelZoom: false,
+                zoomControl: false,
+                doubleClickZoom: false
             });
 
-        // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            // L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             // L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
             L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-            // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            maxNativeZoom: 19,
-            maxZoom: 25
+                // L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxNativeZoom: 19,
+                maxZoom: 25
+            }
+            ).addTo(map);
+            L.control.scale().addTo(map);
+            var marker = L.marker([36.664165457763715, -4.458582401275635]).addTo(map);
+            map.on('dragend', function (e) {
+                c = map.getCenter()
+                console.log(c.lat)
+                marker.setLatLng(c).update();
+            });
+            map.on('zoomend', function (e) {
+                c = map.getCenter()
+                marker.setLatLng(c).update();
+            });
         }
-        ).addTo(map);
-        L.control.scale().addTo(map);
-        var marker = L.marker([36.664165457763715, -4.458582401275635]).addTo(map);
-        map.on('dragend', function (e) {
-            c = map.getCenter()
-            console.log(c.lat)
-            marker.setLatLng(c).update();
-        });
-        map.on('zoomend', function (e) {
-            c = map.getCenter()
-            marker.setLatLng(c).update();
-        });
+        map()
 
+
+        // GUI
+        {
+            var step = 0;
+            // funciones
+            var controls = new function () {
+                this.inclinacion = 30;
+                this.orientacion = 0;
+                this.sol = 0;
+                this.posiciona = function () {
+                    to_image();
+
+                    console.log(controls.inclinacion)
+                }
+                this.posicionaT = function () {
+                    to_image();
+                    console.log(controls.inclinacion)
+                }
+            };
+            //  panel
+            var gui = new dat.GUI({ autoPlace: false });
+            gui.add(controls, 'inclinacion', 0, 90).step(1);
+            gui.add(controls, 'orientacion', -180, 180).step(1);
+            gui.add(controls, 'sol', -180, 180).step(1);
+            gui.add(controls, 'posiciona');
+            // gui.add(controls, 'posicionaT');
+            document.getElementById('my-gui-container').appendChild(gui.domElement);
+        }
 
 
     </script>
 </body>
 
 </html>
-
-
